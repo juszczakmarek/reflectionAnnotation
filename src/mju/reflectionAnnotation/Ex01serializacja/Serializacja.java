@@ -28,6 +28,41 @@ public class Serializacja {
         System.out.println(o2.toString());
         System.out.println("o1.hashCode() == o2.hashCode ? " + (o1.hashCode()==o2.hashCode()));
 
+        Osoba o3 = fromJsonGeneric(message,Osoba.class);
+        System.out.println(o3.toString());
+        System.out.println("o2.hashCode() == o3.hashCode ? " + (o2.hashCode()==o3.hashCode()));
+    }
+
+    //Class.fromName -stworzyc instancje klasy osoba z uzyciem Class.forName
+    private static <T> T fromJsonGeneric(String json, Class<T> classType) throws ClassNotFoundException, IllegalAccessException, InstantiationException, NoSuchFieldException {
+        Class clazz = Class.forName(classType.getName());
+        T object  = (T) clazz.newInstance();
+
+        String[] fieldsAsString = json.split(",");
+        fieldsAsString[0]=fieldsAsString[0].replace("{","");
+        fieldsAsString[fieldsAsString.length-1]=fieldsAsString[fieldsAsString.length-1].replace("}","");
+
+        for (int i=0;i<fieldsAsString.length;i++) {
+            String[] localJsonLine = fieldsAsString[i].split(":");
+            String fieldName = localJsonLine[0].replace("\"", "").trim();
+            String fieldValue = localJsonLine[1].replace("\"", "").trim();
+
+            Field field = object.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            if (field.getType()==Integer.TYPE) {
+                field.set(object,Integer.valueOf(fieldValue));
+            } else if (field.getType()==Double.TYPE) {
+                field.set(object,Double.valueOf(fieldValue));
+            } else if (field.getType()==Long.TYPE) {
+                field.set(object,Long.valueOf(fieldValue));
+            //
+            //  itd... dla wszystkich typów prostych
+            //
+            } else {
+                field.set(object,fieldValue);
+            }
+        }
+        return object;
     }
 
     //Class.fromName -stworzyc instancje klasy osoba z uzyciem Class.forName
