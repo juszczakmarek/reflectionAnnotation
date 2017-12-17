@@ -26,13 +26,13 @@ public class Serializacja {
         String className = o1.getClass().getName();
         Osoba o2 = fromJson(message, className);
         System.out.println(o2.toString());
+        System.out.println("o1.hashCode() == o2.hashCode ? " + (o1.hashCode()==o2.hashCode()));
 
-//        System.out.println(o.getClass().getName());
     }
 
     //Class.fromName -stworzyc instancje klasy osoba z uzyciem Class.forName
     private static Osoba fromJson(String json, String className) throws ClassNotFoundException, IllegalAccessException, InstantiationException, NoSuchFieldException {
-        Class clazz = Class.forName("mju.reflectionAnnotation.Ex01serializacja.Osoba");
+        Class clazz = Class.forName(className);
         Osoba osoba = (Osoba) clazz.newInstance();
 
         String[] fieldsAsString = json.split(",");
@@ -46,23 +46,12 @@ public class Serializacja {
 
             Field field = osoba.getClass().getDeclaredField(fieldName);
             field.setAccessible(true);
-            if (i==0) {
-                field.set(osoba,fieldValue);
-            } else {
+            if (field.getType()==Integer.TYPE) {
                 field.set(osoba,Integer.parseInt(String.valueOf(fieldValue)));
+            } else {
+                field.set(osoba,fieldValue);
             }
         }
-
-//        for (String incomingJsonLine : fieldsAsString) {
-//            String[] localJsonLine = incomingJsonLine.split(":");
-//            String fieldName = localJsonLine[0].replace("\"", "");
-//            String fieldValue = localJsonLine[1].replace("\"", "").trim();
-//
-//            Field field = osoba.getClass().getDeclaredField(fieldName);
-//            field.setAccessible(true);
-//            field.set(osoba,fieldValue);
-//        }
-
         return osoba;
     }
 
